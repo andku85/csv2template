@@ -24,21 +24,49 @@ function readFile(input) {
     };
 }
 
-function convert() {
-    var jsonArr = JSON.parse(dataInput);
+var jasonArr;
+var cL = 0;
+var cDownload = 0;
+var cSkip = 0;
 
-    for (var i = 0; i < jsonArr.length; i++) {
-        var fileName = jsonArr[i].fileName;
-        delete jsonArr[i].fileName;
+function convertLoop(){
+    setTimeout(function(){
+        var fileName = jsonArr[cL].fileName;
+        delete jsonArr[cL].fileName;
 
         if (fileName != ""){
-            var jsonTemp = JSON.stringify(jsonArr[i], null, 2);
-
+            var jsonTemp = JSON.stringify(jsonArr[cL], null, 2);
+            cDownload++;
             download(fileName + ".txt", jsonTemp);
         } else {
-            continue;
+            cSkip++;
         }
-    }
+
+        cL++;
+        if (cL < jsonArr.length){
+            convertLoop();
+        } else {
+            var message = "Done : Total - " + jsonArr.length + " : Downloaded - " + cDownload + " : Skipped - " + cSkip;
+            alert(message);
+
+            // disable button
+            $('#convert').prop('disabled', false);
+        }
+
+    }, 1000);
+}
+
+function convert() {
+    // disable button
+    $('#convert').prop('disabled', true);
+
+    jsonArr = JSON.parse(dataInput);
+
+    cL = 0;
+    cDownload = 0;
+    cSkip = 0;
+
+    convertLoop();
 }
 
 function download(filename, text) {
